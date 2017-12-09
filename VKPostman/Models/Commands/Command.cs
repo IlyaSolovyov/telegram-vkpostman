@@ -10,7 +10,7 @@ namespace VKPostman.Models.Commands
     public abstract class Command
     {
         public abstract string Name { get; }
-        public abstract void Execute(Message message, TelegramBotClient client);
+        public abstract void ExecuteAsync(Message message, TelegramBotClient client);
 
         public bool Contains(string command)
         {

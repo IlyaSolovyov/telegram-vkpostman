@@ -21,10 +21,13 @@ namespace VKPostman.Models
             }
 
             commandsList = new List<Command>();
-            commandsList.Add(new TestCommand());
-            var hook = string.Format(AppSettings.Url, "api/message/");
+            commandsList.Add(new SubscribeCommand());
+            commandsList.Add(new UnsubscribeCommand());
+            commandsList.Add(new ListCommand());
+            commandsList.Add(new HelpCommand());
 
             client = new TelegramBotClient(AppSettings.BotApiKey);
+            var hook = string.Format(AppSettings.Url, "api/message/");
             await client.SetWebhookAsync(hook);
             return client;
         }

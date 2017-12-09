@@ -24,7 +24,7 @@ namespace VKPostman.Controllers
             {
                 if (command.Contains(message.Text))
                 {
-                    command.Execute(message, client);
+                    command.ExecuteAsync(message, client);
                     break;
                 }
             }
@@ -35,7 +35,7 @@ namespace VKPostman.Controllers
         [HttpGet]
         public IActionResult Test()
         {          
-            return Ok("Don't worry, routing works");
+            return Ok("Server is up.");
         }
     }
 }

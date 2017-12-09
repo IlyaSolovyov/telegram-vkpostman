@@ -7,16 +7,16 @@ using Telegram.Bot.Types;
 
 namespace VKPostman.Models.Commands
 {
-    public class TestCommand : Command
+    public class ListCommand : Command
     {
-        public override string Name => "test";
+        public override string Name => "/list";
 
-        public override async void Execute(Message message, TelegramBotClient client)
+        public override async void ExecuteAsync(Message message, TelegramBotClient client)
         {
             var chatId = message.Chat.Id;
             var messageId = message.MessageId;
 
-            await client.SendTextMessageAsync(chatId, "Ага, понятно.", replyToMessageId: messageId);
+            await client.SendTextMessageAsync(chatId, "Здесь будет список подписок.");
         }
     }
 }
