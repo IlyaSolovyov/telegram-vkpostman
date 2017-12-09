@@ -24,7 +24,7 @@ namespace VKPostman.Models
             commandsList.Add(new TestCommand());
             var hook = string.Format(AppSettings.Url, "api/message/");
 
-            client = new TelegramBotClient(AppSettings.Key);
+            client = new TelegramBotClient(AppSettings.BotApiKey);
             await client.SetWebhookAsync(hook);
             return client;
         }

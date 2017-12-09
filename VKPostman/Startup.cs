@@ -17,6 +17,8 @@ namespace VKPostman
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            AppSettings.BotApiKey = Configuration["BotApiKey"];
+            AppSettings.VkApiKey = Configuration["VkApiKey"];
             Bot.Get().Wait();
         }
 
