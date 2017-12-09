@@ -12,5 +12,6 @@ namespace VKPostman.Models
         public static string Name { get; set; } = "vkpostmann_bot";
         public static string VkApiKey { get; set; }
         public static string BotApiKey { get; set; }
+        public static string ConnectionString { get; set; }
     }
 }
