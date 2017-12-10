@@ -16,20 +16,20 @@ namespace VKPostman.Controllers
         [HttpPost]
         public async  Task<IActionResult> Update([FromBody]Update update)
         {
-            var commands = Bot.Commands;
-            var message = update.Message;
-            var client = await Bot.Get();
+              var commands = Bot.Commands;
+              var message = update.Message;
+              var client = await Bot.Get();
+          
+              foreach(var command in commands)
+              {
+                  if (command.Contains(message.Text))
+                  {
+                      command.ExecuteAsync(message, client);
+                      break;
+                  }
+              }
 
-            foreach(var command in commands)
-            {
-                if (command.Contains(message.Text))
-                {
-                    command.ExecuteAsync(message, client);
-                    break;
-                }
-            }
-
-            return Ok("Response to '" + message + "' command has been issued");
+              return Ok("Response to '" + message + "' command has been issued");
         }
 
         [HttpGet]

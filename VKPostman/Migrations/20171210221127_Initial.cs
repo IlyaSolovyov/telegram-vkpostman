@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
@@ -14,9 +13,9 @@ namespace VKPostman.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    LastPostId = table.Column<int>(nullable: false),
-                    PageVkId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LastPostId = table.Column<long>(nullable: false),
+                    PageVkId = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,8 +27,8 @@ namespace VKPostman.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ChatId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ChatId = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,7 +36,7 @@ namespace VKPostman.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Subscription",
+                name: "Subscriptions",
                 columns: table => new
                 {
                     SubscriberId = table.Column<int>(nullable: false),
@@ -45,15 +44,15 @@ namespace VKPostman.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Subscription", x => new { x.SubscriberId, x.PublicPageId });
+                    table.PrimaryKey("PK_Subscriptions", x => new { x.SubscriberId, x.PublicPageId });
                     table.ForeignKey(
-                        name: "FK_Subscription_PublicPages_PublicPageId",
+                        name: "FK_Subscriptions_PublicPages_PublicPageId",
                         column: x => x.PublicPageId,
                         principalTable: "PublicPages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Subscription_Subscribers_SubscriberId",
+                        name: "FK_Subscriptions_Subscribers_SubscriberId",
                         column: x => x.SubscriberId,
                         principalTable: "Subscribers",
                         principalColumn: "Id",
@@ -61,15 +60,15 @@ namespace VKPostman.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscription_PublicPageId",
-                table: "Subscription",
+                name: "IX_Subscriptions_PublicPageId",
+                table: "Subscriptions",
                 column: "PublicPageId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Subscription");
+                name: "Subscriptions");
 
             migrationBuilder.DropTable(
                 name: "PublicPages");

@@ -17,10 +17,22 @@ namespace VKPostman
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            EnableLogging();
+            PopulateAppSettings();
+            Bot.Get().Wait();   
+        }
+
+        private void EnableLogging()
+        {
+        }
+
+        private void PopulateAppSettings()
+        {
+            AppSettings.Url = Configuration["Url"];
             AppSettings.BotApiKey = Configuration["BotApiKey"];
             AppSettings.VkApiKey = Configuration["VkApiKey"];
             AppSettings.ConnectionString = Configuration["ConnectionString"];
-            Bot.Get().Wait();
+            AppSettings.VkAppId = Configuration["VkAppId"];
         }
 
         public IConfiguration Configuration { get; }

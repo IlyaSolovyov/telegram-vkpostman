@@ -8,8 +8,8 @@ namespace VKPostman.Models
     public class PublicPage
     {
         public int Id { get; set; }
-        public int PageVkId { get; set; }
-        public int LastPostId { get; set; }
+        public long PageVkId { get; set; }
+        public long LastPostId { get; set; }
 
         public List<Subscription> Subscriptions { get; set; }
 

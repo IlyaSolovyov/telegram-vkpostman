@@ -8,7 +8,7 @@ namespace VKPostman.Models
     public class Subscriber
     {
         public int Id { get; set; }
-        public int ChatId { get; set; }
+        public long ChatId { get; set; }
 
         public List<Subscription> Subscriptions { get; set; }
 

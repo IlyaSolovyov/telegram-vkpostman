@@ -16,17 +16,16 @@ namespace VKPostman.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
             modelBuilder.Entity("VKPostman.Models.PublicPage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("LastPostId");
+                    b.Property<long>("LastPostId");
 
-                    b.Property<int>("PageVkId");
+                    b.Property<long>("PageVkId");
 
                     b.HasKey("Id");
 
@@ -38,7 +37,7 @@ namespace VKPostman.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("ChatId");
+                    b.Property<long>("ChatId");
 
                     b.HasKey("Id");
 
@@ -55,7 +54,7 @@ namespace VKPostman.Migrations
 
                     b.HasIndex("PublicPageId");
 
-                    b.ToTable("Subscription");
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("VKPostman.Models.Subscription", b =>
