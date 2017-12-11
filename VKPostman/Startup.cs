@@ -33,14 +33,14 @@ namespace VKPostman
             while (true)
             {
                 Thread.Sleep(TimeSpan.FromMinutes(15));
-                client.GetStringAsync(AppSettings.Url + "/api/message");
+                client.GetStringAsync(AppSettings.Url + "api/message");
             }
         }
 
         private void ScheduleNewsFeed()
         {
             var registry = new Registry();
-            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(10).Seconds();
+            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(10).Minutes();
             JobManager.Initialize(registry);
         }
 
