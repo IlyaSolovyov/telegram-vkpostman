@@ -11,6 +11,8 @@ using Microsoft.Extensions.Options;
 using VKPostman.Models;
 using System.Threading;
 using System.Net.Http;
+using FluentScheduler;
+using VKPostman.Services;
 
 namespace VKPostman
 {
@@ -21,7 +23,8 @@ namespace VKPostman
             Configuration = configuration;
             PopulateAppSettings();
             ThreadPool.QueueUserWorkItem(o => Pinch());
-            Bot.Get().Wait();   
+            ScheduleNewsFeed();
+            Bot.Get().Wait();        
         }
 
         private void Pinch()
@@ -29,9 +32,16 @@ namespace VKPostman
             HttpClient client = new HttpClient();
             while (true)
             {
-                Thread.Sleep(TimeSpan.FromMinutes(30));
+                Thread.Sleep(TimeSpan.FromMinutes(15));
                 client.GetStringAsync(AppSettings.Url + "/api/message");
             }
+        }
+
+        private void ScheduleNewsFeed()
+        {
+            var registry = new Registry();
+            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(30).Seconds();
+            JobManager.Initialize(registry);
         }
 
 
