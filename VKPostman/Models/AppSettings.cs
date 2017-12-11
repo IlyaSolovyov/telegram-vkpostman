@@ -8,9 +8,14 @@ namespace VKPostman.Models
 {
     public static class AppSettings
     {
-        public static string Url { get; set; } = "https://e28d7c48.ngrok.io/{0}";
+        public static string Url { get; set; }
         public static string Name { get; set; } = "vkpostmann_bot";
-        public static string VkApiKey { get; set; }
         public static string BotApiKey { get; set; }
+
+        public static string VkApiKey { get; set; }
+        public static string VkAppId { get; set; } 
+       
+        public static string TelegraphApiKey { get; set; }
+        public static string ConnectionString { get; set; }
     }
 }

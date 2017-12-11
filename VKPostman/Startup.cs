@@ -9,6 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VKPostman.Models;
+using System.Threading;
+using System.Net.Http;
+using FluentScheduler;
+using VKPostman.Services;
 
 namespace VKPostman
 {
@@ -17,9 +21,38 @@ namespace VKPostman
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            PopulateAppSettings();
+            ThreadPool.QueueUserWorkItem(o => Pinch());
+            ScheduleNewsFeed();
+            Bot.Get().Wait();        
+        }
+
+        private void Pinch()
+        {
+            HttpClient client = new HttpClient();
+            while (true)
+            {
+                Thread.Sleep(TimeSpan.FromMinutes(15));
+                client.GetStringAsync(AppSettings.Url + "api/message");
+            }
+        }
+
+        private void ScheduleNewsFeed()
+        {
+            var registry = new Registry();
+            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(10).Minutes();
+            JobManager.Initialize(registry);
+        }
+
+
+        private void PopulateAppSettings()
+        {
+            AppSettings.Url = Configuration["Url"];
             AppSettings.BotApiKey = Configuration["BotApiKey"];
             AppSettings.VkApiKey = Configuration["VkApiKey"];
-            Bot.Get().Wait();
+            AppSettings.ConnectionString = Configuration["ConnectionString"];
+            AppSettings.VkAppId = Configuration["VkAppId"];
+            AppSettings.TelegraphApiKey = Configuration["TelegraphApikey"];
         }
 
         public IConfiguration Configuration { get; }

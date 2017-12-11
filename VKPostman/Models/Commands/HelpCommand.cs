@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using VKPostman.Services;
 
 namespace VKPostman.Models.Commands
 {
@@ -15,8 +16,9 @@ namespace VKPostman.Models.Commands
         {
             var chatId = message.Chat.Id;
             var messageId = message.MessageId;
-
-            await client.SendTextMessageAsync(chatId, "Тут когда-то будет справка");
+            await client.SendTextMessageAsync(chatId, "Справка будет когда-то потом.");
+    
+           
         }
     }
 }
