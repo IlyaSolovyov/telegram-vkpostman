@@ -40,7 +40,7 @@ namespace VKPostman
         private void ScheduleNewsFeed()
         {
             var registry = new Registry();
-           // registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(30).Seconds();
+            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(10).Seconds();
             JobManager.Initialize(registry);
         }
 
@@ -52,6 +52,7 @@ namespace VKPostman
             AppSettings.VkApiKey = Configuration["VkApiKey"];
             AppSettings.ConnectionString = Configuration["ConnectionString"];
             AppSettings.VkAppId = Configuration["VkAppId"];
+            AppSettings.TelegraphApiKey = Configuration["TelegraphApikey"];
         }
 
         public IConfiguration Configuration { get; }

@@ -90,19 +90,7 @@ namespace VKPostman.Services
             db.SaveChanges();
             return "Вы успешно отписались от '" + page.Name + "'.";
         }
-
-        static Group GetPageByScreenName(string pageScreenName)
-        {
-            try
-            {
-                return client.Groups.GetById(pageScreenName);
-            }
-            catch (VkNet.Exception.ParameterMissingOrInvalidException ex)
-            {
-                return null;
-            }
-           
-        }
+      
         static long GetLastPostId(long pageId)
         {
             pageId *= -1;
@@ -216,6 +204,18 @@ namespace VKPostman.Services
           
         }
 
+        public static Group GetPageByScreenName(string pageScreenName)
+        {
+            try
+            {
+                return client.Groups.GetById(pageScreenName);
+            }
+            catch (VkNet.Exception.ParameterMissingOrInvalidException ex)
+            {
+                return null;
+            }
+
+        }
         public static List<Post> GetLastPosts(long pageVkId, int amount)
         {
             return client.Wall.Get(new WallGetParams

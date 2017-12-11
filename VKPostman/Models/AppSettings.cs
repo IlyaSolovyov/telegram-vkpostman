@@ -15,6 +15,7 @@ namespace VKPostman.Models
         public static string VkApiKey { get; set; }
         public static string VkAppId { get; set; } 
        
+        public static string TelegraphApiKey { get; set; }
         public static string ConnectionString { get; set; }
     }
 }
