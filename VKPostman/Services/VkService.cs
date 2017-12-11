@@ -54,13 +54,13 @@ namespace VKPostman.Services
             {
                 Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
                 PublicPage pageModel = AddOrReturnPublicPage(page);
-                if (db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id))
+                if (db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id && subscription.SubscriberId == subscriberModel.Id))
                 {
                     return "Ошибка параметра: вы уже подписаны на данную страницу.";
                 }
             }
             return null;
-        }
+        }   
         static string Subscribe(long chatId, Group page)
         {
             Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
@@ -74,7 +74,7 @@ namespace VKPostman.Services
         {
                 Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
                 PublicPage pageModel = AddOrReturnPublicPage(page);
-                if (!db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id))
+                if (!db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id && subscription.SubscriberId==subscriberModel.Id ))
                 {
                     return "Ошибка параметра: вы не подписаны на данную страницу.";
                 }
@@ -214,6 +214,15 @@ namespace VKPostman.Services
             }
             
           
+        }
+
+        public static List<Post> GetLastPosts(long pageVkId, int amount)
+        {
+            return client.Wall.Get(new WallGetParams
+            {
+                OwnerId=pageVkId*(-1),
+                Count = ulong.Parse(amount.ToString())
+            }).WallPosts.ToList<Post>();
         }
         #endregion
     }
