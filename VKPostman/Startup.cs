@@ -40,7 +40,7 @@ namespace VKPostman
         private void ScheduleNewsFeed()
         {
             var registry = new Registry();
-            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(30).Seconds();
+           // registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(30).Seconds();
             JobManager.Initialize(registry);
         }
 
