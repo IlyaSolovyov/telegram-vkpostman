@@ -16,7 +16,7 @@ namespace VKPostman.Models.Commands
         {
             var chatId = message.Chat.Id;
             var messageId = message.MessageId;
-            await client.SendTextMessageAsync(chatId, "Справка будет когда-то потом.");
+            await client.SendTextMessageAsync(chatId, "http://telegra.ph/Spravka-po-VKPostman-12-11");
     
            
         }

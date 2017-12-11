@@ -51,7 +51,7 @@ namespace VKPostman.Services
         }
         private static NodeElement PrepareText(List<NodeElement> nodes, Post post)
         {
-            return post.Text.Length != 0 ? post.Text + "\n" : null;
+            return post.Text.Length != 0 ? post.Text + "\n\n" : null;
         }
         private static NodeElement PrepareAudio(List<NodeElement> nodes, ReadOnlyCollection<Attachment> attachments)
         {

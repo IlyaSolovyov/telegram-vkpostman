@@ -21,29 +21,17 @@ namespace VKPostman
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            PopulateAppSettings();
-          //  ThreadPool.QueueUserWorkItem(o => Pinch());
+            PopulateAppSettings();     
             ScheduleNewsFeed();
             Bot.Get().Wait();        
-        }
-
-        private void Pinch()
-        {
-            HttpClient client = new HttpClient();
-            while (true)
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(15));
-                client.GetStringAsync(String.Format(AppSettings.Url, "api/message"));
-            }
         }
 
         private void ScheduleNewsFeed()
         {
             var registry = new Registry();
-            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(10).Minutes();
+            registry.Schedule(() => TelegramService.DeliverMessagesAsync()).ToRunEvery(5).Minutes();
             JobManager.Initialize(registry);
         }
-
 
         private void PopulateAppSettings()
         {

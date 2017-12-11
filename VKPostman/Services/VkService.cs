@@ -29,12 +29,20 @@ namespace VKPostman.Services
         #region Private Methods
         static string TryParseCommand(string command)
         {
-            string parameter = command.Split(' ').Last();
-            if (!parameter.StartsWith("https://vk.com/"))
+            if (command == "/subscribe")
             {
-                return "Ошибка : формат ссылки должен быть https://vk.com/идентификаторпаблика";
+                return "Ошибка: формат команды должен быть /subscribe https://vk.com/идентификаторпаблика";
             }
-            return null;
+            else
+            {
+                String parameter = command.Split(' ').Last();
+
+                if (!parameter.StartsWith("https://vk.com/"))
+                {
+                    return "Ошибка : формат ссылки должен быть https://vk.com/идентификаторпаблика";
+                }
+                return null;
+            }      
         }
         static string ParseCommand(string command)
         {
@@ -233,6 +241,12 @@ namespace VKPostman.Services
         {
             try
             {
+
+                System.Text.RegularExpressions.Regex rgx = new System.Text.RegularExpressions.Regex("^public(\\d{9})$");
+                if (rgx.IsMatch(pageScreenName))
+                {
+                   pageScreenName = pageScreenName.Substring(pageScreenName.LastIndexOf("public") + 6);
+                }
                 return client.Groups.GetById(pageScreenName);
             }
             catch (VkNet.Exception.ParameterMissingOrInvalidException ex)
