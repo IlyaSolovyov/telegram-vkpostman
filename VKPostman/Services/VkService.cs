@@ -9,6 +9,7 @@ using VkNet.Model.RequestParams;
 using VKPostman.DAL;
 using VKPostman.Models;
 using Microsoft.EntityFrameworkCore;
+using VkNet.Exception;
 
 namespace VKPostman.Services
 {
@@ -54,6 +55,10 @@ namespace VKPostman.Services
             {
                 Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
                 PublicPage pageModel = AddOrReturnPublicPage(page);
+                if (pageModel == null)
+                {
+                    return "Ошибка системы: данные в данном паблике повреждены. Попробуйте подписаться после обновления последних двух постов.";
+                }
                 if (db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id && subscription.SubscriberId == subscriberModel.Id))
                 {
                     return "Ошибка параметра: вы уже подписаны на данную страницу.";
@@ -74,7 +79,11 @@ namespace VKPostman.Services
         {
                 Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
                 PublicPage pageModel = AddOrReturnPublicPage(page);
-                if (!db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id && subscription.SubscriberId==subscriberModel.Id ))
+            if (pageModel == null)
+            {
+                return "Ошибка системы: данные в данном паблике повреждены. Попробуйте подписаться после обновления последних двух постов.";
+            }
+            if (!db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id && subscription.SubscriberId==subscriberModel.Id ))
                 {
                     return "Ошибка параметра: вы не подписаны на данную страницу.";
                 }
@@ -93,13 +102,21 @@ namespace VKPostman.Services
       
         static long GetLastPostId(long pageId)
         {
-            pageId *= -1;
-            var twoLastPosts = client.Wall.Get(new WallGetParams
+            try
             {
-                Count = 2,
-                OwnerId = pageId
-            });
-            return twoLastPosts.WallPosts.Max(post => post.Id).Value;
+                pageId *= -1;
+                var twoLastPosts = client.Wall.Get(new WallGetParams
+                {
+                    Count = 2,
+                    OwnerId = pageId
+                });
+                return twoLastPosts.WallPosts.Max(post => post.Id).Value;
+            }
+             catch(VkApiException ex)
+            {
+                return Int64.MaxValue;
+            }
+           
         }
 
         static Subscriber AddOrReturnSubscriber(long chatId)
@@ -125,15 +142,23 @@ namespace VKPostman.Services
             PublicPage page;
             if (!db.PublicPages.Any(o => o.PageVkId == group.Id))
             {
-                page = new PublicPage()
+                long lastPostId = GetLastPostId(group.Id);
+                if (lastPostId != Int64.MaxValue)
                 {
-                    PageVkId = group.Id,
-                    LastPostId = GetLastPostId(group.Id),
-                    Name = group.Name,
-                    ScreenName=group.ScreenName
-                };
-                db.PublicPages.Add(page);
-                db.SaveChanges();
+                    page = new PublicPage()
+                    {
+                        PageVkId = group.Id,
+                        LastPostId = GetLastPostId(group.Id),
+                        Name = group.Name,
+                        ScreenName = group.ScreenName
+                    };
+                    db.PublicPages.Add(page);
+                    db.SaveChanges();
+                }
+                else
+                {
+                    return null;
+                }           
             }
             else
             {

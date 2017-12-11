@@ -17,7 +17,6 @@ namespace VKPostman.Services
         static TelegramBotClient telegram;
         static DatabaseContext db;
 
-
         static TelegramService()
         {
             telegram = Bot.Get().Result;
@@ -97,18 +96,18 @@ namespace VKPostman.Services
             return contentBuilder.ToString();
 
         }
-        public static string GetPostTelegraph(Post post)
+        public static async Task<string> GetPostTelegraph(Group page, Post post)
         {
-            return TelegraphService.GetTelegraphPage(post);
+            return await TelegraphService.GetTelegraphPageAsync(page, post);
         }
 
         private static string PrepareMessage(Group group, Post post)
         {
             StringBuilder messageBuilder = new StringBuilder();
+            messageBuilder.AppendLine(GetPostTelegraph(group, post).Result + "\n");
             messageBuilder.AppendLine(GetPostInfo(group, post));
             messageBuilder.AppendLine(GetPostText(post));
-            messageBuilder.AppendLine(GetPostContent(post));
-            messageBuilder.AppendLine(GetPostTelegraph(post));
+            messageBuilder.AppendLine(GetPostContent(post));        
             return messageBuilder.ToString();
         }
         private static async Task DeliverPostAsync(long chatId, Group group, Post post)
@@ -119,7 +118,7 @@ namespace VKPostman.Services
         #endregion
 
         internal static async Task DeliverMessagesAsync()
-        {
+        { 
             List<PublicPage> pages = GetTrackedPages();
             foreach(var page in pages)
             {
@@ -139,6 +138,38 @@ namespace VKPostman.Services
                 }
             }
                       
-        }  
+        }
+
+        internal static async Task DeliverMessagesAsyncForDebug()
+        {
+            await telegram.SendTextMessageAsync(373499493, "Начало цикла.");
+            List<PublicPage> pages = GetTrackedPages();
+            foreach (var page in pages)
+            {
+                await telegram.SendTextMessageAsync(373499493, "Начало работы со страницей " + page.Name);
+                List<Subscriber> subscribers = GetSubscribers(page);
+                if (subscribers.Count > 0)
+                {
+                    await telegram.SendTextMessageAsync(373499493, "На неё подписаны " + subscribers.Count);
+                    List<Post> posts = GetNewPosts(page);
+                    if (posts.Count > 0)
+                    {
+                        await telegram.SendTextMessageAsync(373499493, "Количество новых постов: " + posts.Count);
+                        foreach (var subscriber in subscribers)
+                        {
+                            await SendPostsAsync(subscriber, VkService.GetPageByScreenName(page.ScreenName), posts);
+                        }
+                        await telegram.SendTextMessageAsync(373499493, "Вроде как разослали");
+                        page.LastPostId = posts.Max(p => p.Id).Value;
+                        await telegram.SendTextMessageAsync(373499493, "Изменили данные");
+                        db.SaveChanges();
+                        await telegram.SendTextMessageAsync(373499493, "И сохранили");
+                    }
+                }
+            }
+
+        }
+
+
     }
 }

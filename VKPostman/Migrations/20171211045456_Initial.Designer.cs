@@ -10,7 +10,7 @@ using VKPostman.DAL;
 namespace VKPostman.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20171210232221_Initial")]
+    [Migration("20171211045456_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
