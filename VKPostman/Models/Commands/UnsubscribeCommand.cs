@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using VKPostman.Services;
 
 namespace VKPostman.Models.Commands
 {
@@ -14,9 +15,8 @@ namespace VKPostman.Models.Commands
         public override async void ExecuteAsync(Message message, TelegramBotClient client)
         {
             var chatId = message.Chat.Id;
-            var messageId = message.MessageId;
-
-            await client.SendTextMessageAsync(chatId, "Пока отписаться не от чего.");
+            string response = VkService.RemoveSubscription(chatId, message.Text);
+            await client.SendTextMessageAsync(chatId, response);
         }
     }
 }

@@ -10,6 +10,8 @@ namespace VKPostman.Models
         public int Id { get; set; }
         public long PageVkId { get; set; }
         public long LastPostId { get; set; }
+        public string Name { get; set; }
+        public string ScreenName { get; set; }
 
         public List<Subscription> Subscriptions { get; set; }
 

@@ -33,9 +33,9 @@ namespace VKPostman.Controllers
         }
 
         [HttpGet]
-        public IActionResult Test()
+        public IActionResult Pinch()
         {          
-            return Ok("Server is up.");
+            return Ok("I'm not sleeping!");
         }
     }
 }

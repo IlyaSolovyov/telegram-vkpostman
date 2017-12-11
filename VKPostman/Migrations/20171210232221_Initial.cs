@@ -15,7 +15,9 @@ namespace VKPostman.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     LastPostId = table.Column<long>(nullable: false),
-                    PageVkId = table.Column<long>(nullable: false)
+                    Name = table.Column<string>(nullable: true),
+                    PageVkId = table.Column<long>(nullable: false),
+                    ScreenName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

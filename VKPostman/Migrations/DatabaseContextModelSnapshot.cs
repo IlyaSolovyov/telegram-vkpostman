@@ -25,7 +25,11 @@ namespace VKPostman.Migrations
 
                     b.Property<long>("LastPostId");
 
+                    b.Property<string>("Name");
+
                     b.Property<long>("PageVkId");
+
+                    b.Property<string>("ScreenName");
 
                     b.HasKey("Id");
 

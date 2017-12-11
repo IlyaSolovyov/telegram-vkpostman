@@ -10,7 +10,7 @@ using VKPostman.DAL;
 namespace VKPostman.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20171210221127_Initial")]
+    [Migration("20171210232221_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,7 +26,11 @@ namespace VKPostman.Migrations
 
                     b.Property<long>("LastPostId");
 
+                    b.Property<string>("Name");
+
                     b.Property<long>("PageVkId");
+
+                    b.Property<string>("ScreenName");
 
                     b.HasKey("Id");
 

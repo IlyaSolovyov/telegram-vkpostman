@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using VkNet;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
 using VKPostman.DAL;
 using VKPostman.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace VKPostman.Services
 {
@@ -21,14 +23,13 @@ namespace VKPostman.Services
             client.Authorize(new ApiAuthParams { AccessToken = AppSettings.VkApiKey});
         }
 
+       
+
         #region Private Methods
         static string TryParseCommand(string command)
         {
             string parameter = command.Split(' ').Last();
-            if (parameter == null)
-            {
-                return "Ошибка : формат команды должен быть /subscribe https://vk.com/идентификаторпаблика.";
-            } else if (!parameter.StartsWith("https://vk.com/"))
+            if (!parameter.StartsWith("https://vk.com/"))
             {
                 return "Ошибка : формат ссылки должен быть https://vk.com/идентификаторпаблика";
             }
@@ -69,7 +70,28 @@ namespace VKPostman.Services
             return "Вы успешно подписались на '" + page.Name + "'.";
         }
 
-        public static Group GetPageByScreenName(string pageScreenName)
+        static string TryUnsubscribe(long chatId, Group page)
+        {
+                Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
+                PublicPage pageModel = AddOrReturnPublicPage(page);
+                if (!db.Subscriptions.Any(subscription => subscription.PublicPageId == pageModel.Id))
+                {
+                    return "Ошибка параметра: вы не подписаны на данную страницу.";
+                }
+            
+            return null;
+        }
+        static string Unsubscribe(long chatId, Group page)
+        {
+            Subscriber subscriberModel = AddOrReturnSubscriber(chatId);
+            PublicPage pageModel = AddOrReturnPublicPage(page);
+            Subscription subscriptionModel = db.Subscriptions.Single(subscription => subscription.PublicPageId == pageModel.Id);
+            subscriberModel.Subscriptions.Remove(subscriptionModel);
+            db.SaveChanges();
+            return "Вы успешно отписались от '" + page.Name + "'.";
+        }
+
+        static Group GetPageByScreenName(string pageScreenName)
         {
             try
             {
@@ -118,7 +140,9 @@ namespace VKPostman.Services
                 page = new PublicPage()
                 {
                     PageVkId = group.Id,
-                    LastPostId = GetLastPostId(group.Id)
+                    LastPostId = GetLastPostId(group.Id),
+                    Name = group.Name,
+                    ScreenName=group.ScreenName
                 };
                 db.PublicPages.Add(page);
                 db.SaveChanges();
@@ -138,7 +162,7 @@ namespace VKPostman.Services
             string botResponse = TryParseCommand(message);
             if (botResponse == null)
             {
-                
+               
                 Group page = GetPageByScreenName(ParseCommand(message));
                 botResponse = TrySubscribe(chatId, page);
                 if (botResponse == null)
@@ -147,6 +171,49 @@ namespace VKPostman.Services
                 }
             }
             return botResponse;
+        }
+        public static string RemoveSubscription(long chatId, string message)
+        {
+            string botResponse = TryParseCommand(message);
+            if (botResponse == null)
+            {
+
+                Group page = GetPageByScreenName(ParseCommand(message));
+                botResponse = TryUnsubscribe(chatId, page);
+                if (botResponse == null)
+                {
+                    botResponse = Unsubscribe(chatId, page);
+                }
+            }
+            return botResponse;
+        }
+        public static string ListSubscriptions(long chatId)
+        {
+            StringBuilder botResponseBuilder = new StringBuilder();
+            int counter = 0;
+            var subscriptions = db.Subscriptions
+                .Where(subscription => subscription.Subscriber.ChatId == chatId)
+                .Include(page => page.PublicPage);
+                    
+            if (!subscriptions.Any())
+            {
+                return "Вы не подписаны ни на одну страницу.";
+            }
+            else
+            {
+                botResponseBuilder.AppendLine("Вы подписаны на:");
+                foreach (var subscription in subscriptions)
+                {
+                    string link = "https://vk.com/" + subscription.PublicPage.ScreenName;
+                    botResponseBuilder.AppendLine(String.Format
+                        ("{0}. {1} - {2}.", ++counter,
+                        subscription.PublicPage.Name,
+                        link));
+                }
+                return botResponseBuilder.ToString();
+            }
+            
+          
         }
         #endregion
     }
