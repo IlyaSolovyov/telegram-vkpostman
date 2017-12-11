@@ -22,7 +22,7 @@ namespace VKPostman
         {
             Configuration = configuration;
             PopulateAppSettings();
-            ThreadPool.QueueUserWorkItem(o => Pinch());
+          //  ThreadPool.QueueUserWorkItem(o => Pinch());
             ScheduleNewsFeed();
             Bot.Get().Wait();        
         }
@@ -32,8 +32,8 @@ namespace VKPostman
             HttpClient client = new HttpClient();
             while (true)
             {
-                Thread.Sleep(TimeSpan.FromMinutes(15));
-                client.GetStringAsync(AppSettings.Url + "api/message");
+                Thread.Sleep(TimeSpan.FromSeconds(15));
+                client.GetStringAsync(String.Format(AppSettings.Url, "api/message"));
             }
         }
 
