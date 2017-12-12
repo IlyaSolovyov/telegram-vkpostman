@@ -30,33 +30,35 @@ namespace VKPostman.Services
         }
         private static List<Subscriber> GetSubscribers(PublicPage page)
         {
-                List<Subscriber> subscribers = new List<Subscriber>();
+            List<Subscriber> subscribers = new List<Subscriber>();
 
-                List<Subscription> subscriptions = db.Subscriptions
-                .Include(sub => sub.Subscriber)
-                .Where(subscription => subscription.PublicPageId == page.Id)               
-                .ToList<Subscription>();
+            List<Subscription> subscriptions = db.Subscriptions
+            .Include(sub => sub.Subscriber)
+            .Where(subscription => subscription.PublicPageId == page.Id)
+            .ToList<Subscription>();
 
-                foreach (var subscription in subscriptions)
-                {
-                    subscribers.Add(subscription.Subscriber);
-                }
+            foreach (var subscription in subscriptions)
+            {
+                subscribers.Add(subscription.Subscriber);
+            }
             return subscribers;
         }
 
         private static List<Post> GetNewPosts(PublicPage page)
         {
             return VkService.GetLastPosts(page.PageVkId, 50)
-                            .Where(i => i.Id>page.LastPostId)
+                            .Where(i => i.Id > page.LastPostId)
                             .OrderBy(o => o.Id)
                             .ToList<Post>();
         }
-        private static async Task SendPostsAsync(Subscriber subscriber, Group group, List<Post> posts)
+        private static async Task SendPostsAsync(Subscriber subscriber, PublicPage page, Group group, List<Post> posts)
         {
-            foreach(var post in posts)
+            foreach (var post in posts)
             {
-                await DeliverPostAsync(subscriber.ChatId,group, post);
-              
+                await DeliverPostAsync(subscriber.ChatId, group, post);
+                page.LastPostId = post.Id.Value;
+                db.SaveChanges();
+
             }
         }
 
@@ -66,7 +68,29 @@ namespace VKPostman.Services
         }
         public static string GetPostText(Post post)
         {
-            return post.Text.Length!=0 ? post.Text + "\n" : null;
+
+           if (post.Text.Length < 1024)
+            {
+                return post.Text.Length != 0 ? post.Text + "\n" : null;
+            }
+            else
+            {
+                StringBuilder result = new StringBuilder();
+                string[] sentences = System.Text.RegularExpressions.Regex.Split(post.Text, @"(?<=[\.!\?])\s+");
+                if (sentences.Length > 5)
+                {                   
+                    for (int i = 0; i < 5; i++)
+                    {
+                        result.Append(sentences[i]);
+                    }
+                }
+                else
+                {
+                    result.Append(post.Text.Substring(0, 1024));
+                }
+                result.Append("\n(Продолжение текста по ссылке...)");
+                return result.ToString();
+            }         
         }
         public static string GetPostContent(Post post)
         {
@@ -75,7 +99,7 @@ namespace VKPostman.Services
             int videoCount = 0;
 
             StringBuilder contentBuilder = new StringBuilder();
-            foreach(var attachment in post.Attachments)
+            foreach (var attachment in post.Attachments)
             {
                 if (attachment.Type == typeof(Photo))
                 {
@@ -107,37 +131,38 @@ namespace VKPostman.Services
             messageBuilder.AppendLine(GetPostTelegraph(group, post).Result + "\n");
             messageBuilder.AppendLine(GetPostInfo(group, post));
             messageBuilder.AppendLine(GetPostText(post));
-            messageBuilder.AppendLine(GetPostContent(post));        
+            messageBuilder.AppendLine(GetPostContent(post));
             return messageBuilder.ToString();
         }
         private static async Task DeliverPostAsync(long chatId, Group group, Post post)
         {
-            await telegram.SendTextMessageAsync(chatId, PrepareMessage(group, post));          
+            await telegram.SendTextMessageAsync(chatId, PrepareMessage(group, post));
         }
-       
+
         #endregion
 
         internal static async Task DeliverMessagesAsync()
-        { 
+        {
+            await telegram.SendTextMessageAsync(373499493, "Начало цикла.");
+            int count = 0;
             List<PublicPage> pages = GetTrackedPages();
-            foreach(var page in pages)
+            foreach (var page in pages)
             {
                 List<Subscriber> subscribers = GetSubscribers(page);
-                if(subscribers.Count>0)
+                if (subscribers.Count > 0)
                 {
                     List<Post> posts = GetNewPosts(page);
                     if (posts.Count > 0)
                     {
                         foreach (var subscriber in subscribers)
                         {
-                            await SendPostsAsync(subscriber, VkService.GetPageByScreenName(page.ScreenName), posts);
+                            await SendPostsAsync(subscriber, page, VkService.GetPageByScreenName(page.ScreenName), posts);                           
                         }
-                        page.LastPostId = posts.Max(p => p.Id).Value;
-                        db.SaveChanges();
-                    }                
+                        count += posts.Count*subscribers.Count;
+                    }
                 }
             }
-                      
+                await telegram.SendTextMessageAsync(373499493, "Отправлено " + count + " сообщений.");
         }
 
         internal static async Task DeliverMessagesAsyncForDebug()
@@ -157,19 +182,14 @@ namespace VKPostman.Services
                         await telegram.SendTextMessageAsync(373499493, "Количество новых постов: " + posts.Count);
                         foreach (var subscriber in subscribers)
                         {
-                            await SendPostsAsync(subscriber, VkService.GetPageByScreenName(page.ScreenName), posts);
+                            await SendPostsAsync(subscriber, page, VkService.GetPageByScreenName(page.ScreenName), posts);
                         }
-                        await telegram.SendTextMessageAsync(373499493, "Вроде как разослали");
-                        page.LastPostId = posts.Max(p => p.Id).Value;
-                        await telegram.SendTextMessageAsync(373499493, "Изменили данные");
-                        db.SaveChanges();
-                        await telegram.SendTextMessageAsync(373499493, "И сохранили");
                     }
                 }
+
             }
 
+
         }
-
-
     }
 }

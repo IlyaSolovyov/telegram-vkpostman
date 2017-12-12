@@ -42,6 +42,7 @@ namespace VKPostman.Services
             nodes.Add(PrepareInfo(nodes, page, post));
             nodes.Add(PrepareText(nodes,post));
             nodes.Add(PrepareAudio(nodes, post.Attachments));
+            nodes.Add(PrepareVideo(nodes, post.Attachments));
             nodes.AddRange(PrepareImages(nodes, post.Attachments));
             return nodes.ToArray<NodeElement>();
         }
@@ -68,12 +69,39 @@ namespace VKPostman.Services
             StringBuilder nodeBuilder = new StringBuilder();
             foreach (var audio in audios)
             {
-                nodeBuilder.Append(String.Format("🎧 {0} - {1}\n", audio.Artist, audio.Title));
-                
+                nodeBuilder.Append(String.Format("🎧 {0} - {1}\n", audio.Artist, audio.Title));              
             }
             if (audios.Count>0) nodeBuilder.Append("\n");
             return nodeBuilder.ToString();
         }
+        private static NodeElement PrepareVideo(List<NodeElement> nodes, ReadOnlyCollection<Attachment> attachments)
+        {
+            List<Video> videos = new List<Video>();
+            foreach (var attachment in attachments)
+            {
+                if (attachment.Type == typeof(Video))
+                {
+                    videos.Add(attachment.Instance as Video);
+                }
+
+            }
+
+            StringBuilder nodeBuilder = new StringBuilder();
+            foreach (var video in videos)
+            {
+                var duration = GetVideoDuration(video);
+                var videoData = String.Format("🎬  {0} ({1})\n", video.Title, duration);
+                nodeBuilder.Append(videoData);
+            }
+            if (videos.Count > 0) nodeBuilder.Append("\n");
+            return nodeBuilder.ToString();
+        }
+
+        private static string GetVideoDuration(Video video)
+        {
+            return String.Format("{0}:{1}", video.Duration / 60, video.Duration % 60);
+        }
+
         private static NodeElement[] PrepareImages(List<NodeElement> nodes, ReadOnlyCollection<Attachment> attachments)
         {
             List<NodeElement> range = new List<NodeElement>();
